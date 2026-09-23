@@ -1,27 +1,6 @@
 server:
-  port: 8080 # Внешний порт шлюза
+  port: 8080
 
 spring:
   application:
     name: api-gateway
-  cloud:
-    gateway:
-      mvc:
-        routes:
-          # --- БАНК (IdP + Карты) ---
-          - id: bank-auth-route
-            uri: http://bank-system:8080 # Внутренний порт докера
-            predicates:
-              - Path=/api/auth/**
-
-          - id: bank-cards-route
-            uri: http://bank-system:8080
-            predicates:
-              - Path=/api/cards/**
-
-          # --- ОТЕЛЬ ---
-          - id: hotel-route
-            uri: http://hotel-system:8080
-            predicates:
-              - Path=/api/hotels/**
-              - Path=/api/bookings/** # Оставил на случай, если брони на отдельном маппинге
