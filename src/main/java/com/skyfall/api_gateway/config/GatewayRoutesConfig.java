@@ -16,32 +16,36 @@ public class GatewayRoutesConfig {
 
     private static final Logger log = LoggerFactory.getLogger(GatewayRoutesConfig.class);
 
+    private static final String BANK_URI = "http://bank-system:8080";
+    private static final String HOTEL_URI = "http://hotel-system:8080";
+
     @Bean
     public RouterFunction<ServerResponse> gatewayRouterFunctions() {
-        return route("bank-routes")
+        return route("bank_service")
                 .route(path(
                         "/api/auth/**",
                         "/api/admin/users/**",
                         "/api/cards/**",
                         "/api/transfer/**"
                 ), http())
-                .before(uri("http://bank-system:8080"))
+                .before(uri(BANK_URI))
                 .filter((request, next) -> {
                     log.info("[GATEWAY -> BANK] {} {}", request.method(), request.uri().getPath());
                     return next.handle(request);
                 })
-                .route(path(
-                        "/api/hotels/**",
-                        "/api/rooms/**",
-                        "/api/bookings/**",
-                        "/api/statistics/**",
-                        "/api/users/**"
-                ), http())
-                .before(uri("http://hotel-system:8080"))
-                .filter((request, next) -> {
-                    log.info("[GATEWAY -> HOTEL] {} {}", request.method(), request.uri().getPath());
-                    return next.handle(request);
-                })
-                .build();
+                .build().and(route("hotel_service")
+                        .route(path(
+                                "/api/hotels/**",
+                                "/api/rooms/**",
+                                "/api/bookings/**",
+                                "/api/statistics/**",
+                                "/api/users/**"
+                        ), http())
+                        .before(uri(HOTEL_URI))
+                        .filter((request, next) -> {
+                            log.info("[GATEWAY -> HOTEL] {} {}", request.method(), request.uri().getPath());
+                            return next.handle(request);
+                        })
+                        .build());
     }
 }
